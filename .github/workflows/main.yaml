@@ -22,7 +22,7 @@ jobs:
                 TAG=$(date +%s)
                 docker build -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
-                echo "IMAGE_TAG:$TAG" >> $GITHUB_ENV
+                echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
             - name: Atualizar imagem no repositório de manifests
               uses: appleboy/ssh-action@v1.0.3
               with:
