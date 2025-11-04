@@ -30,7 +30,7 @@ jobs:
                 username: git
                 key: ${{ secrets.SSH_PRIVATE_KEY }}
                 script: |
-                    git clone git@github.com:pedro-albertini/hello-manifests.git
+                    git clone git@github.com:usuario/hello-manifests.git
                     cd hello-manifests
                     sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
                     git config --global user.email "github-actions@github.com"
