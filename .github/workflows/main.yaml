@@ -1,0 +1,41 @@
+name: CI/CD
+
+on:
+    push:
+        branches: [ "main" ] 
+    pull_request:
+        branches: [ "main" ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Login DOcker Hub
+              uses: docker/login-actions@v3
+              with:
+                username: ${{ secrets. DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+            - name: Build e push da imagem para o Docker Hub
+              run: |
+                IMAGE=${{ secrets.DOCKER_USERNAME }}/hello-app
+                TAG=$(date +%s)
+                docker build -t $IMAGE:$TAG .
+                docker push $IMAGE:$TAG
+                echo "IMAGE_TAG:$TAG" >> $GITHUB_ENV
+            - name: Atualizar imagem no repositório de manifests
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                host: github.com
+                username: git
+                key: ${{ secrets.SSH_PRIVATE_KEY }}
+                script: |
+                    git clone git@github.com:pedro-albertini/hello-manifests.git
+                    cd hello-manifests
+                    sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
+                    git config --global user.email "github-actions@github.com"
+                    git config --global user.name "GitHub Actions"
+                    git add deployment.yaml
+                    git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+                    git push origin main
+                    
