@@ -23,16 +23,17 @@ jobs:
                 docker build -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
                 echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-            - name: Clonar e atualizar manifests via SSH
+            - name: Clonar repositório de manifests via SSH
               uses: actions/checkout@v4
               with:
-                repository: pedro-albertini/hello-manifests
-                ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-                path: hello-manifests
+               repository: pedro-albertini/hello-manifests
+               ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+               path: manifests
+               persist-credentials: false
 
             - name: Atualizar imagem no deployment.yaml
               run: |
-                cd hello-manifests
+                cd manifests
                 sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
                 git config --global user.email "github-actions@github.com"
                 git config --global user.name "GitHub Actions"
