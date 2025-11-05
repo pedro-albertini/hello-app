@@ -29,6 +29,7 @@ jobs:
                 repository: pedro-albertini/hello-manifests
                 ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
                 path: hello-manifests
+
             - name: Atualizar imagem no deployment.yaml
               run: |
                 cd hello-manifests
@@ -36,5 +37,5 @@ jobs:
                 git config --global user.email "github-actions@github.com"
                 git config --global user.name "GitHub Actions"
                 git add deployment.yaml
-                git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
-                git push origin main
+                git commit -m "Update image tag to ${{ env.IMAGE_TAG }}" || echo "Nada para commitar"
+                git push origin main || echo "Push não necessário"
