@@ -1,1 +1,194 @@
-# hello-app
+# 🚀 CI/CD e GitOps na Prática com FastAPI, Docker Hub e ArgoCD
+
+> Projeto de **automação completa do ciclo de desenvolvimento** com **FastAPI**, **GitHub Actions**, **Docker Hub**, **Kubernetes (Rancher Desktop)** e **ArgoCD**, aplicando os conceitos modernos de **CI/CD** e **GitOps**.
+
+<br>
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=python,fastapi,docker,github,kubernetes" />
+  <img src="https://argo-cd.readthedocs.io/en/stable/assets/logo.png" width="48" height="48" alt="ArgoCD"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rancher/rancher-original.svg" width="48" height="48" alt="Rancher Desktop"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/yaml/yaml-original.svg" width="48" height="48" alt="YAML"/>
+</p>
+
+<br>
+
+## 🧭 Introdução
+
+O desenvolvimento moderno exige **integração contínua (CI)** e **entrega contínua (CD)** para garantir agilidade, qualidade e segurança no deploy de aplicações.  
+
+Neste projeto, foi construído um pipeline completo que faz **build, publicação e deploy automático** de uma aplicação **FastAPI** em um cluster **Kubernetes local**, seguindo o modelo **GitOps** com **ArgoCD**.
+
+A estrutura combina as seguintes ferramentas:
+
+- 🐍 **FastAPI** — backend em Python
+- ⚙️ **GitHub Actions** — CI/CD para build e push automático
+- 🐳 **Docker Hub** — container registry público
+- ☸️ **Kubernetes (Rancher Desktop)** — cluster local
+- 🔁 **ArgoCD** — sincronização GitOps para deploy automático
+
+<br>
+
+## 🎯 Objetivo
+
+Automatizar **todo o ciclo de desenvolvimento**, desde o commit do código até o deploy no Kubernetes, utilizando um fluxo totalmente controlado por Git:
+
+```bash
++------------------+       +------------------+       +--------------------+       +-------------------+
+|    hello-app     |       |   Docker Hub     |       |   hello-manifests  |       |     ArgoCD        |
+| (FastAPI + CI/CD)| ----> | (Container Repo) | ----> | (K8s Manifests Git)| ----> | (Sync no Cluster) |
++------------------+       +------------------+       +--------------------+       +-------------------+
+```
+
+<br>
+
+## ⚙️ Pré-requisitos
+
+Antes de começar, garanta que as ferramentas abaixo estejam instaladas e configuradas:
+
+| Ferramenta | Função | Verificação |
+|-------------|--------|-------------|
+| **Python 3** | Executar o FastAPI localmente | `python --version` |
+| **Docker** | Buildar e publicar imagens | `docker ps` |
+| **Git** | Versionamento e controle de código | `git --version` |
+| **GitHub** | Hospedagem dos repositórios | Conta criada |
+| **Rancher Desktop** | Kubernetes local | `kubectl get nodes` |
+| **ArgoCD** | Entrega contínua GitOps | Instalado no cluster |
+
+<br>
+
+## 🧩 Estrutura dos Repositórios
+
+Este projeto utiliza **dois repositórios GitHub**:
+
+### 1️⃣ Repositório `hello-app`
+Contém:
+- Aplicação FastAPI (`main.py`)
+- `Dockerfile`
+- Workflow (`.github/workflows/main.yml`)
+
+Responsável por:
+- Buildar e publicar imagens no Docker Hub  
+- Atualizar o repositório de manifests (`hello-manifests`)
+
+### 2️⃣ Repositório `hello-manifests`
+Contém os arquivos Kubernetes:
+- `deployment.yaml`
+- `service.yaml`
+
+Responsável por:
+- Armazenar os manifests observados pelo ArgoCD  
+- Garantir o modelo GitOps, onde o **Git é a fonte da verdade**
+
+<br>
+
+## ⚙️ Etapa 1 – Criar a aplicação FastAPI
+
+Crie o repositório `hello-app` com o arquivo `main.py`:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message": "Hello World"}
+```
+
+E o arquivo requirements.txt:
+
+```
+fastapi
+uvicorn
+```
+
+Crie o Dockerfile para containerizar a aplicação:
+
+```
+FROM python:3.10-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+<br>
+
+## ⚙️ Etapa 2 – Configurar CI/CD no GitHub Actions
+
+Crie o arquivo .github/workflows/main.yml no repositório hello-app:
+
+Secrets necessários no GitHub (Settings → Secrets → Actions):
+
+| Nome              | Valor                                                                    |
+| ----------------- | ------------------------------------------------------------------------ |
+| `DOCKER_USERNAME` | seu usuário do Docker Hub                                                |
+| `DOCKER_PASSWORD` | token de acesso Docker Hub                                               |
+| `SSH_PRIVATE_KEY` | chave privada SSH (com “Allow write access” no repositório de manifests) |
+
+<br>
+
+## 🧱 Etapa 3 – Criar os manifests do Kubernetes
+
+No repositório hello-manifests, adicione os arquivos:
+
+deployment.yaml:
+service.yaml:
+
+<br>
+
+## ☸️ Etapa 4 – Configurar o ArgoCD
+
+Instale o ArgoCD:
+
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Faça o port-forward:
+
+```
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Acesse no navegador:
+🔗 https://localhost:8080
+
+Obtenha a senha do admin:
+
+```
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo
+```
+
+## Criar o app no ArgoCD
+
+| Campo                | Valor                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Application Name** | hello-app                                                                                                        |
+| **Project**          | default                                                                                                          |
+| **Repository URL**   | [https://github.com/pedro-albertini/hello-manifests.git](https://github.com/pedro-albertini/hello-manifests.git) |
+| **Revision**         | HEAD                                                                                                             |
+| **Path**             | `.`                                                                                                              |
+| **Cluster URL**      | [https://kubernetes.default.svc](https://kubernetes.default.svc)                                                 |
+| **Namespace**        | default                                                                                                          |
+
+## 🌐 Etapa 5 – Acessar a aplicação localmente
+
+Verifique os pods:
+
+```
+kubectl get pods
+```
+
+Crie o port-forward:
+
+```
+kubectl port-forward svc/hello-app-service 8080:8080
+```
+
+Acesse:
+🔗 http://localhost:8080
