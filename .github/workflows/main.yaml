@@ -23,19 +23,18 @@ jobs:
                 docker build -t $IMAGE:$TAG .
                 docker push $IMAGE:$TAG
                 echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-            - name: Atualizar imagem no repositório de manifests
-              uses: appleboy/ssh-action@v1.0.3
+            - name: Clonar e atualizar manifests via SSH
+              uses: actions/checkout@v4
               with:
-                host: github.com
-                username: git
-                key: ${{ secrets.SSH_PRIVATE_KEY }}
-                script: |
-                    git clone git@github.com:pedro-albertini/hello-manifests.git
-                    cd hello-manifests
-                    sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
-                    git config --global user.email "github-actions@github.com"
-                    git config --global user.name "GitHub Actions"
-                    git add deployment.yaml
-                    git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
-                    git push origin main
-                    
+                repository: pedro-albertini/hello-manifests
+                ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+                path: hello-manifests
+            - name: Atualizar imagem no deployment.yaml
+              run: |
+                cd hello-manifests
+                sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
+                git config --global user.email "github-actions@github.com"
+                git config --global user.name "GitHub Actions"
+                git add deployment.yaml
+                git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+                git push origin main
