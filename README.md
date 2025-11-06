@@ -61,20 +61,20 @@ Antes de começar, garanta que as ferramentas abaixo estejam instaladas e config
 
 Este projeto utiliza **dois repositórios GitHub**:
 
-### 1️⃣ Repositório `hello-app`
+### 1️⃣ Repositório [`hello-app`](https://github.com/pedro-albertini/hello-app)
 Contém:
-- Aplicação FastAPI (`main.py`)
-- `Dockerfile`
-- Workflow (`.github/workflows/main.yml`)
+- Aplicação FastAPI [`main.py`](main.py)
+- [`Dockerfile`](Dockerfile)
+- Workflow [`.github/workflows/main.yml`](.github/workflows/main.yml)
 
 Responsável por:
 - Buildar e publicar imagens no Docker Hub  
 - Atualizar o repositório de manifests (`hello-manifests`)
 
-### 2️⃣ Repositório `hello-manifests`
+### 2️⃣ Repositório [`hello-manifests`](https://github.com/pedro-albertini/hello-manifests)
 Contém os arquivos Kubernetes:
-- `deployment.yaml`
-- `service.yaml`
+- [`deployment.yaml`](https://github.com/pedro-albertini/hello-manifests/blob/main/deployment.yaml)
+- [`service.yaml`](https://github.com/pedro-albertini/hello-manifests/blob/main/service.yaml)
 
 Responsável por:
 - Armazenar os manifests observados pelo ArgoCD  
@@ -86,7 +86,7 @@ Responsável por:
 
 Crie um novo repositório no seu GitHub chamado por exemplo `hello-app` 
 
-Dentro desse novo repoistório, crie um arquivo python [`main.py`](main.py) para colocar sua API:
+Dentro desse novo repoistório, crie um arquivo python `main.py` para colocar sua API:
 
 ```python
 from fastapi import FastAPI
