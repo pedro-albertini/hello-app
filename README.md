@@ -65,7 +65,7 @@ Este projeto utiliza **dois repositórios GitHub**:
 Contém:
 - Aplicação FastAPI [`main.py`](main.py)
 - [`Dockerfile`](Dockerfile)
-- Workflow [`.github/workflows/main.yml`]([/github/workflows/main.yml](https://github.com/pedro-albertini/hello-app/blob/main/.github/workflows/main.yaml))
+- Workflow [`.github/workflows/main.yml`](https://github.com/pedro-albertini/hello-app/blob/main/.github/workflows/main.yaml)
 
 Responsável por:
 - Buildar e publicar imagens no Docker Hub  
