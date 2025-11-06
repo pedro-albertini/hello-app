@@ -296,7 +296,17 @@ Após a sincronização, atualize a página em http://localhost:8080 — a nova 
 |-------------------------------------------------------------------------------------------------------------------------|
 | *Figura - Aplicação Atualizando* |
 
+<br>
 
+## 🧾 Conclusão
 
+Este projeto demonstra, de forma prática, o funcionamento do ciclo completo de CI/CD e GitOps:
+desde o desenvolvimento e build automatizado, até a entrega contínua via ArgoCD.
+
+Com essa abordagem, toda a infraestrutura e o estado da aplicação ficam versionados no Git, garantindo rastreabilidade, segurança e velocidade nas entregas.
+
+---
+🧑‍💻 Desenvolvido por [Pedro Albertini Fernandes Pinto](https://github.com/pedro-albertini) 
+Projeto prático do módulo **Automação CI/CD e GitOps com FastAPI e ArgoCD**
 
 
