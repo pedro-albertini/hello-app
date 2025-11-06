@@ -123,13 +123,16 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 Crie o arquivo .github/workflows/main.yml no repositório hello-app:
 
-Agora vamos criar os secrets necessários no GitHub, ainda dentro do repositório hello-app acesse `Settings → Secrets and Variables → Actions` e coloque os valores:
+Agora adicione os secrets necessários no GitHub, acessando:
+Settings → Secrets and Variables → Actions
 
 | Nome              | Valor                                                                    |
 | ----------------- | ------------------------------------------------------------------------ |
 | `DOCKER_USERNAME` | seu usuário do Docker Hub                                                |
-| `DOCKER_PASSWORD` | sua senha do Docker Hub                                                  |
+| `DOCKER_PASSWORD` | sua senha ou token do Docker Hub                                                  |
 | `SSH_PRIVATE_KEY` | chave privada SSH (com “Allow write access” no repositório de manifests) |
+
+Esses valores serão usados para login no Docker Hub e atualização automática do repositório de manifests.
 
 <br>
 
@@ -144,20 +147,18 @@ service.yaml:
 
 ## ☸️ Etapa 4 – Configurar o ArgoCD
 
-Primeiro vamos instalar o ArgoCD, no terminal:
+Primeiro no terminal, instale o ArgoCD:
 
 ```
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-Verifique os pods:
+Verifique se todos os pods estão rodando:
 
 ```
 kubectl get pods -n argocd
 ```
-
-Se todos aparecerem com status Running, ele está instalado.✔️
 
 Crie o port-forward para acessa-lo:
 
@@ -229,7 +230,7 @@ kubectl get pods
 
 <br>
 
-## 🌐 Etapa 5 – Acessar a aplicação localmente
+## 🖥️ Etapa 6 – Acessar a aplicação localmente
 
 Verifique os pods:
 
@@ -246,6 +247,56 @@ kubectl port-forward svc/hello-app-service 8080:8080
 Acesse:
 🔗 http://localhost:8080
 
+E você verá sia aplicação rodando:
 
-Acesse:
-🔗 http://localhost:8080
+| <img width="1914" height="974" alt="image" src="https://github.com/user-attachments/assets/3aa6f440-61cb-4b69-a8b5-871cf8150ef7" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Aplicação Rodando* |
+
+
+## 🧪 Etapa 7 – Testar atualização automática
+
+Edite o arquivo `main.py` e altere o return:
+
+```python
+return {"message": "Hello Compass"}
+```
+
+Faça commit e push no repositório hello-app.
+
+O GitHub Actions buildará uma nova imagem:
+
+| <img width="1912" height="969" alt="image" src="https://github.com/user-attachments/assets/549d740f-4b3d-4587-a906-f9cae27262d4" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Build GitHub Actions* |
+
+<br>
+
+Publicará no Docker Hub:
+
+| <img width="912" height="574" alt="image" src="https://github.com/user-attachments/assets/e175fe6b-d2f1-4e78-a289-3a37075d3fa0" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Imagem Docker Hub* |
+
+<br>
+
+E atualizará o repositório hello-manifests com a mesma tag que foi publicado no Docker Hub:
+
+| <img width="1893" height="591" alt="image" src="https://github.com/user-attachments/assets/740f0c38-af86-4fa2-8905-f13636505c77" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Repositório Atualizado* |
+
+
+
+O ArgoCD detectará a mudança e fará o deploy automaticamente.
+
+Após a sincronização, atualize a página em http://localhost:8080 — a nova mensagem aparecerá!
+
+| <img width="1912" height="967" alt="image" src="https://github.com/user-attachments/assets/a649ceaa-0393-48f9-9d0e-37ad09ba2462" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Aplicação Atualizando* |
+
+
+
+
+
