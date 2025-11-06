@@ -86,7 +86,7 @@ Responsável por:
 
 Crie um novo repositório no seu GitHub chamado por exemplo `hello-app` 
 
-Dentro desse novo repoistório, crie um arquivo python `main.py` para colocar sua API:
+Dentro desse novo repoistório, crie um arquivo python [`main.py`](main.py) para colocar sua API:
 
 ```python
 from fastapi import FastAPI
@@ -141,8 +141,45 @@ Esses valores serão usados para login no Docker Hub e atualização automática
 Crie um novo repositório chamado por exemplo de hello-manifests e adicione os arquivos de manifesto do kubernetes:
 
 deployment.yaml:
-service.yaml:
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-app
+  template:
+    metadata:
+      labels:
+        app: hello-app
+    spec:
+      containers:
+        - name: hello-app
+          image: <Seu Docker Hub>/hello-app:latest
+          ports:
+            - containerPort: 8000
 
+```
+
+service.yaml:
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-app-service
+spec:
+  selector:
+    app: hello-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8000
+  type: ClusterIP
+
+```
 <br>
 
 ## ☸️ Etapa 4 – Configurar o ArgoCD
