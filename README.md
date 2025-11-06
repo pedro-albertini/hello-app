@@ -84,7 +84,9 @@ Responsável por:
 
 ## ⚙️ Etapa 1 – Criar a aplicação FastAPI
 
-Crie o repositório `hello-app` com o arquivo `main.py`:
+Crie um novo repositório no seu GitHub chamado por exemplo `hello-app` 
+
+Dentro desse novo repoistório, crie um arquivo python `main.py` para colocar sua API:
 
 ```python
 from fastapi import FastAPI
@@ -96,7 +98,7 @@ def root():
     return {"message": "Hello World"}
 ```
 
-E o arquivo requirements.txt:
+Crie o arquivo `requirements.txt`, que vai servir para listar todas as dependências para o seu projeto e ajudar no processo de automação:
 
 ```
 fastapi
@@ -121,19 +123,19 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 Crie o arquivo .github/workflows/main.yml no repositório hello-app:
 
-Secrets necessários no GitHub (Settings → Secrets → Actions):
+Agora vamos criar os secrets necessários no GitHub, ainda dentro do repositório hello-app acesse `Settings → Secrets and Variables → Actions` e coloque os valores:
 
 | Nome              | Valor                                                                    |
 | ----------------- | ------------------------------------------------------------------------ |
 | `DOCKER_USERNAME` | seu usuário do Docker Hub                                                |
-| `DOCKER_PASSWORD` | token de acesso Docker Hub                                               |
+| `DOCKER_PASSWORD` | sua senha do Docker Hub                                                  |
 | `SSH_PRIVATE_KEY` | chave privada SSH (com “Allow write access” no repositório de manifests) |
 
 <br>
 
 ## 🧱 Etapa 3 – Criar os manifests do Kubernetes
 
-No repositório hello-manifests, adicione os arquivos:
+Crie um novo repositório chamado por exemplo de hello-manifests e adicione os arquivos de manifesto do kubernetes:
 
 deployment.yaml:
 service.yaml:
@@ -142,29 +144,52 @@ service.yaml:
 
 ## ☸️ Etapa 4 – Configurar o ArgoCD
 
-Instale o ArgoCD:
+Primeiro vamos instalar o ArgoCD, no terminal:
 
 ```
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-Faça o port-forward:
+Verifique os pods:
 
 ```
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl get pods -n argocd
+```
+
+Se todos aparecerem com status Running, ele está instalado.✔️
+
+Crie o port-forward para acessa-lo:
+
+```
+kubectl port-forward svc/argocd-server -n argocd 8081:443
 ```
 
 Acesse no navegador:
-🔗 https://localhost:8080
+🔗 http://localhost:8081
 
-Obtenha a senha do admin:
+E você verá uma página assim:
+
+| <img width="1914" height="540" alt="image" src="https://github.com/user-attachments/assets/e0b237f1-3ba2-4c50-9e05-308189c35541" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Painel ArgoCD* |
+
+Credenciais padrão:
+
+- Usuário: admin
+
+- Senha: (use o comando abaixo para descobrir)
 
 ```
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo
 ```
 
-## Criar o app no ArgoCD
+
+##  🌐 Etapa 5 - Criar o app no ArgoCD
+
+No painel do ArgoCD, clique em NEW APP
+
+Preencha os campos de acordo com a tabela a seguir:
 
 | Campo                | Valor                                                                                                            |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -175,6 +200,34 @@ kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.pas
 | **Path**             | `.`                                                                                                              |
 | **Cluster URL**      | [https://kubernetes.default.svc](https://kubernetes.default.svc)                                                 |
 | **Namespace**        | default                                                                                                          |
+
+<br>
+
+Ficando assim o preenchimento dos campos no ArgoCD:
+
+| <img width="1917" height="867" alt="image" src="https://github.com/user-attachments/assets/5e2aa07c-ed54-4449-a37b-b3f9d06329fe" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Configuração Aplicação ArgoCD* |
+
+| <img width="1918" height="868" alt="image" src="https://github.com/user-attachments/assets/06a9380b-1986-4a6a-a53e-848ae6964273" />|
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Configuração Aplicação ArgoCD* |
+
+| <img width="1915" height="862" alt="image" src="https://github.com/user-attachments/assets/5758b4e6-6634-46f3-a231-0c8bd4cf50ee" />|
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Configuração Aplicação ArgoCD* |
+
+- Clique em Create
+
+- Depois, clique em SYNC → SYNCHRONIZE
+
+- Verifique se os pods da aplicação estão rodando:
+
+```
+kubectl get pods
+```
+
+<br>
 
 ## 🌐 Etapa 5 – Acessar a aplicação localmente
 
@@ -189,6 +242,10 @@ Crie o port-forward:
 ```
 kubectl port-forward svc/hello-app-service 8080:8080
 ```
+
+Acesse:
+🔗 http://localhost:8080
+
 
 Acesse:
 🔗 http://localhost:8080
