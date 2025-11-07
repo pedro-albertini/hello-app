@@ -119,7 +119,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 <br>
 
-## ⚙️ Etapa 2 – Configurar CI/CD no GitHub Actions
+## 🔁 Etapa 2 – Configurar CI/CD no GitHub Actions
 
 Crie o arquivo .github/workflows/main.yml no repositório hello-app:
 
