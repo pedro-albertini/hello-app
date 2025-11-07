@@ -123,6 +123,49 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 Crie o arquivo .github/workflows/main.yml no repositório hello-app:
 
+```
+name: CI/CD
+
+on:
+    push:
+        branches: [ "main" ] 
+    pull_request:
+        branches: [ "main" ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Login Docker Hub
+              uses: docker/login-action@v3
+              with:
+                username: ${{ secrets. DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+            - name: Build e push da imagem para o Docker Hub
+              run: |
+                IMAGE=${{ secrets.DOCKER_USERNAME }}/hello-app
+                TAG=$(date +%s)
+                docker build -t $IMAGE:$TAG .
+                docker push $IMAGE:$TAG
+                echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+            - name: Clonar e atualizar manifests via SSH
+              uses: actions/checkout@v4
+              with:
+                repository: <Seu GitHub>/hello-manifests
+                ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+                path: hello-manifests
+            - name: Atualizar imagem no deployment.yaml
+              run: |
+                cd hello-manifests
+                sed -i "s#image: .*\$#image: ${{ secrets.DOCKER_USERNAME }}/hello-app:${{ env.IMAGE_TAG }}#" deployment.yaml
+                git config --global user.email "github-actions@github.com"
+                git config --global user.name "GitHub Actions"
+                git add deployment.yaml
+                git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+                git push origin main
+```
+
 Agora adicione os secrets necessários no GitHub, acessando:
 Settings → Secrets and Variables → Actions
 
@@ -133,6 +176,49 @@ Settings → Secrets and Variables → Actions
 | `SSH_PRIVATE_KEY` | chave privada SSH (com “Allow write access” no repositório de manifests) |
 
 Esses valores serão usados para login no Docker Hub e atualização automática do repositório de manifests.
+
+<br>
+
+### 🔑 Gerando e configurando a chave SSH
+
+A autenticação SSH é usada pelo GitHub Actions para conseguir escrever no repositório hello-manifests.
+
+1️⃣ Gerar uma nova chave SSH na sua máquina
+
+No terminal:
+
+```
+ssh-keygen -t ed25519 -C "seu_email@exemplo.com"
+```
+
+Pressione Enter para aceitar o caminho padrão (~/.ssh/id_ed25519).
+Isso criará dois arquivos:
+
+- id_ed25519 → chave privada
+- id_ed25519.pub → chave pública
+
+2️⃣ Adicionar a chave pública no repositório hello-manifests
+
+Acesse:
+Settings → Deploy keys → Add deploy key
+
+- Title: CI Access
+- Key: conteúdo do arquivo id_ed25519.pub
+- Marque ✅ Allow write access
+
+Clique em Add key
+
+3️⃣ Adicionar a chave privada no repositório hello-app
+
+Acesse:
+Settings → Secrets and Variables → Actions → New repository secret
+
+- Name: SSH_PRIVATE_KEY
+- Value: conteúdo completo do arquivo id_ed25519 (sem espaços extras)
+
+Clique em Add secret
+
+Após isso, o GitHub Actions terá permissão para atualizar automaticamente o repositório de manifests sempre que uma nova imagem for criada.
 
 <br>
 
@@ -290,6 +376,7 @@ E você verá sia aplicação rodando:
 |-------------------------------------------------------------------------------------------------------------------------|
 | *Figura - Aplicação Rodando* |
 
+<br>
 
 ## 🧪 Etapa 7 – Testar atualização automática
 
