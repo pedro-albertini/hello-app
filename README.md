@@ -283,6 +283,11 @@ Verifique se todos os pods estão rodando:
 kubectl get pods -n argocd
 ```
 
+| <img width="1917" height="319" alt="image" src="https://github.com/user-attachments/assets/863741d9-3c78-4c3b-b327-e58afb4d4071" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Pod ArgoCD Rodando* |
+
+
 Crie o port-forward para acessa-lo:
 
 ```
@@ -345,11 +350,21 @@ Ficando assim o preenchimento dos campos no ArgoCD:
 
 - Depois, clique em SYNC → SYNCHRONIZE
 
-- Verifique se os pods da aplicação estão rodando:
+| <img width="1917" height="868" alt="image" src="https://github.com/user-attachments/assets/799c8f09-3574-4560-b610-3437b4c63e17" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Aplicação Sincronizado* |
+
+<br>
+
+- Verifique se os pods/deployment da aplicação estão rodando:
 
 ```
 kubectl get pods
 ```
+
+| <img width="1819" height="81" alt="image" src="https://github.com/user-attachments/assets/6187682b-0af8-45bb-9cad-7e6e0b3e03cd" /> |
+|-------------------------------------------------------------------------------------------------------------------------|
+| *Figura - Deployment Aplicação* |
 
 <br>
 
