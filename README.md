@@ -67,7 +67,7 @@ Contém:
 - [`Dockerfile`](Dockerfile)
 - Workflow [`.github/workflows/main.yml`](https://github.com/pedro-albertini/hello-app/blob/main/.github/workflows/main.yaml)
 
-Responsável por:
+Responsável pela primeira etapa do processo:
 - Buildar e publicar imagens no Docker Hub  
 - Atualizar o repositório de manifests (`hello-manifests`)
 
