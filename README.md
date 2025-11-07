@@ -222,227 +222,60 @@ Após isso, o GitHub Actions terá permissão para atualizar automaticamente o r
 
 <br>
 
-## 🧱 Etapa 3 – Criar os manifests do Kubernetes
+### 💡 Função do Workflow
 
-Crie um novo repositório chamado por exemplo de hello-manifests e adicione os arquivos de manifesto do kubernetes:
+O workflow realiza automaticamente:
 
-deployment.yaml:
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-app
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hello-app
-  template:
-    metadata:
-      labels:
-        app: hello-app
-    spec:
-      containers:
-        - name: hello-app
-          image: <Seu Docker Hub>/hello-app:latest
-          ports:
-            - containerPort: 8000
+- Build da imagem Docker da aplicação.
+- Push dessa imagem para o Docker Hub.
+- Atualização automática do repositório hello-manifests com a nova tag da imagem.
 
-```
-
-service.yaml:
-```
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-app-service
-spec:
-  selector:
-    app: hello-app
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8000
-  type: ClusterIP
-
-```
-<br>
-
-## ☸️ Etapa 4 – Configurar o ArgoCD
-
-Primeiro no terminal, instale o ArgoCD:
-
-```
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-```
-
-Verifique se todos os pods estão rodando:
-
-```
-kubectl get pods -n argocd
-```
-
-| <img width="1917" height="319" alt="image" src="https://github.com/user-attachments/assets/863741d9-3c78-4c3b-b327-e58afb4d4071" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Pod ArgoCD Rodando* |
-
-
-Crie o port-forward para acessa-lo:
-
-```
-kubectl port-forward svc/argocd-server -n argocd 8081:443
-```
-
-Acesse no navegador:
-🔗 http://localhost:8081
-
-E você verá uma página assim:
-
-| <img width="1914" height="540" alt="image" src="https://github.com/user-attachments/assets/e0b237f1-3ba2-4c50-9e05-308189c35541" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Painel ArgoCD* |
-
-Credenciais padrão:
-
-- Usuário: admin
-
-- Senha: (use o comando abaixo para descobrir)
-
-```
-kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo
-```
-
-
-##  🌐 Etapa 5 - Criar o app no ArgoCD
-
-No painel do ArgoCD, clique em NEW APP
-
-Preencha os campos de acordo com a tabela a seguir:
-
-| Campo                | Valor                                                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Application Name** | hello-app                                                                                                        |
-| **Project**          | default                                                                                                          |
-| **Repository URL**   | [https://github.com/pedro-albertini/hello-manifests.git](https://github.com/pedro-albertini/hello-manifests.git) |
-| **Revision**         | HEAD                                                                                                             |
-| **Path**             | `.`                                                                                                              |
-| **Cluster URL**      | [https://kubernetes.default.svc](https://kubernetes.default.svc)                                                 |
-| **Namespace**        | default                                                                                                          |
+Após um novo commit, o ArgoCD sincroniza automaticamente o deploy no cluster.
 
 <br>
 
-Ficando assim o preenchimento dos campos no ArgoCD:
+## 🧪 Etapa 3 – Testar a aplicação localmente
 
-| <img width="1917" height="867" alt="image" src="https://github.com/user-attachments/assets/5e2aa07c-ed54-4449-a37b-b3f9d06329fe" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Configuração Aplicação ArgoCD* |
+No terminal, entre na pasta do seu projeto onde está localizado o seu Dockerfile.
 
-| <img width="1918" height="868" alt="image" src="https://github.com/user-attachments/assets/06a9380b-1986-4a6a-a53e-848ae6964273" />|
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Configuração Aplicação ArgoCD* |
-
-| <img width="1915" height="862" alt="image" src="https://github.com/user-attachments/assets/5758b4e6-6634-46f3-a231-0c8bd4cf50ee" />|
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Configuração Aplicação ArgoCD* |
-
-- Clique em Create
-
-- Depois, clique em SYNC → SYNCHRONIZE
-
-| <img width="1917" height="868" alt="image" src="https://github.com/user-attachments/assets/799c8f09-3574-4560-b610-3437b4c63e17" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Aplicação Sincronizado* |
-
-<br>
-
-- Verifique se os pods/deployment da aplicação estão rodando:
-
+Crie a imagem Docker:
 ```
-kubectl get pods
+docker build -t hello-app .
 ```
 
-| <img width="1819" height="81" alt="image" src="https://github.com/user-attachments/assets/6187682b-0af8-45bb-9cad-7e6e0b3e03cd" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Deployment Aplicação* |
-
-<br>
-
-## 🖥️ Etapa 6 – Acessar a aplicação localmente
-
-Verifique os pods:
-
+Rode o container:
 ```
-kubectl get pods
-```
-
-Crie o port-forward:
-
-```
-kubectl port-forward svc/hello-app-service 8080:8080
+docker run -p 8000:8000 hello-app
 ```
 
 Acesse:
-🔗 http://localhost:8080
+🔗 http://localhost:8000
 
-E você verá sia aplicação rodando:
+Saída esperada:
 
-| <img width="1914" height="974" alt="image" src="https://github.com/user-attachments/assets/3aa6f440-61cb-4b69-a8b5-871cf8150ef7" /> |
+| <img width="1913" height="968" alt="image" src="https://github.com/user-attachments/assets/ed5f9521-3a52-48a9-bd44-29699be3c97c" /> |
 |-------------------------------------------------------------------------------------------------------------------------|
 | *Figura - Aplicação Rodando* |
 
 <br>
 
-## 🧪 Etapa 7 – Testar atualização automática
-
-Edite o arquivo `main.py` e altere o return:
-
-```python
-return {"message": "Hello Compass"}
-```
-
-Faça commit e push no repositório hello-app.
-
-O GitHub Actions buildará uma nova imagem:
-
-| <img width="1912" height="969" alt="image" src="https://github.com/user-attachments/assets/549d740f-4b3d-4587-a906-f9cae27262d4" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Build GitHub Actions* |
-
-<br>
-
-Publicará no Docker Hub:
-
-| <img width="912" height="574" alt="image" src="https://github.com/user-attachments/assets/e175fe6b-d2f1-4e78-a289-3a37075d3fa0" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Imagem Docker Hub* |
-
-<br>
-
-E atualizará o repositório hello-manifests com a mesma tag que foi publicado no Docker Hub:
-
-| <img width="1893" height="591" alt="image" src="https://github.com/user-attachments/assets/740f0c38-af86-4fa2-8905-f13636505c77" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Repositório Atualizado* |
-
-
-
-O ArgoCD detectará a mudança e fará o deploy automaticamente.
-
-Após a sincronização, atualize a página em http://localhost:8080 — a nova mensagem aparecerá!
-
-| <img width="1912" height="967" alt="image" src="https://github.com/user-attachments/assets/a649ceaa-0393-48f9-9d0e-37ad09ba2462" /> |
-|-------------------------------------------------------------------------------------------------------------------------|
-| *Figura - Aplicação Atualizando* |
-
-<br>
-
 ## 🧾 Conclusão
 
-Este projeto demonstra, de forma prática, o funcionamento do ciclo completo de CI/CD e GitOps:
-desde o desenvolvimento e build automatizado, até a entrega contínua via ArgoCD.
+Este repositório representa a primeira parte do fluxo CI/CD + GitOps, responsável por:
 
-Com essa abordagem, toda a infraestrutura e o estado da aplicação ficam versionados no Git, garantindo rastreabilidade, segurança e velocidade nas entregas.
+- Construir e publicar a imagem Docker no Docker Hub;
+- Atualizar automaticamente o repositório de manifests usado pelo ArgoCD;
+- Garantir que o ciclo de deploy seja automático, versionado e reproduzível.
+
+<br>
+
+## 📦 Continuação do Projeto
+
+A segunda parte deste projeto está no repositório:
+
+🔗 [`hello-manifests`](https://github.com/pedro-albertini/hello-manifests/tree/main?tab=readme-ov-file)
+
+Lá estão os manifests Kubernetes monitorados pelo ArgoCD, que realiza a sincronização automática da aplicação no cluster sempre que este repositório é atualizado pelo pipeline do hello-app.
 
 ---
 🧑‍💻 Desenvolvido por [Pedro Albertini Fernandes Pinto](https://github.com/pedro-albertini) 
